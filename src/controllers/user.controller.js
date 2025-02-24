@@ -17,8 +17,10 @@ const registerUser = asyncHandler( async (req, res) => {
 
 
 
-    const {fullName, email, username, password} = req.body
+    const {fullname, email, username, password} = req.body
     // console.log(("email: ", email));
+    console.log(req.body);
+    
 
     // if(fullName === ""){
     //     throw new ApiError(400, "fullName is required")
@@ -26,7 +28,7 @@ const registerUser = asyncHandler( async (req, res) => {
 
     // alternative check by using the array for all the entries:
     if(
-        [fullName, email, username, password].some((field) =>
+        [fullname, email, username, password].some((field) =>
         field?.trim() === "")
     ) {
         throw new ApiError(400, "Allfields are required")
@@ -41,8 +43,13 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(409, "User with email or username already exist")
     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path  
-    const coverImageLocalpath = req.files?.coverImage[0]?.path; 
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    // const coverImageLocalpath = req.files?.coverImage?.[0]?.path || null; 
+
+    let coverImageLocalpath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalpath = req.files.coverImage[0].path;
+    }
     
     console.log("Avatar Path:", avatarLocalPath); // Debugging
     console.log("Cover Image Path:", coverImageLocalpath); // Debugging
@@ -50,7 +57,7 @@ const registerUser = asyncHandler( async (req, res) => {
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required")
     }
-
+    
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalpath)
 
@@ -60,7 +67,7 @@ const registerUser = asyncHandler( async (req, res) => {
 
     // create entry in db
     const user = await User.create({
-        fullName,
+        fullname,
         avatar: avatar.url,
         coverImage: coverImage?.url || "",
         email,
