@@ -62,12 +62,12 @@ userSchema.methods.isPasswordCorrect = async function(password) {
 }   //customized function for checking the password is matching or not
 
 userSchema.methods.generateAccessToken = function() {
-    jwt.sign(
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
             username: this.username,
-            fullName: this.fullname
+            fullname: this.fullname
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
